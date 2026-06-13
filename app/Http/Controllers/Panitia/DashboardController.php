@@ -10,12 +10,18 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $totalEvent = Event::where('user_id', Auth::id())->count();
+        if (!Auth::check()) {
+            return view('panitia.dashboard', [
+                'totalEvent' => 0,
+                'pendingEvent' => 0,
+                'approvedEvent' => 0,
+            ]);
+        }
 
+        $totalEvent = Event::where('user_id', Auth::id())->count();
         $pendingEvent = Event::where('user_id', Auth::id())
             ->where('status', 'pending')
             ->count();
-
         $approvedEvent = Event::where('user_id', Auth::id())
             ->where('status', 'approved')
             ->count();

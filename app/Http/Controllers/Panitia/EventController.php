@@ -9,11 +9,12 @@ use Illuminate\Support\Facades\Auth;
 
 class EventController extends Controller
 {
-    /**
-     * Tampilkan daftar event milik panitia.
-     */
     public function index()
     {
+        if (!Auth::check()) {
+            return view('panitia.events.index', ['events' => collect()]);
+        }
+
         $events = Event::where('user_id', Auth::id())
             ->latest()
             ->get();
@@ -21,19 +22,21 @@ class EventController extends Controller
         return view('panitia.events.index', compact('events'));
     }
 
-    /**
-     * Form tambah event.
-     */
     public function create()
     {
+        if (!Auth::check()) {
+            return redirect('/login');
+        }
+
         return view('panitia.events.create');
     }
 
-    /**
-     * Simpan event baru.
-     */
     public function store(Request $request)
     {
+        if (!Auth::check()) {
+            return redirect('/login');
+        }
+
         $request->validate([
             'nama_event'     => 'required',
             'kategori'       => 'required',
@@ -68,9 +71,6 @@ class EventController extends Controller
             ->with('success', 'Event berhasil dibuat');
     }
 
-    /**
-     * Detail event.
-     */
     public function show(string $id)
     {
         $event = Event::findOrFail($id);
@@ -78,21 +78,23 @@ class EventController extends Controller
         return view('panitia.events.show', compact('event'));
     }
 
-    /**
-     * Form edit event.
-     */
     public function edit(string $id)
     {
+        if (!Auth::check()) {
+            return redirect('/login');
+        }
+
         $event = Event::findOrFail($id);
 
         return view('panitia.events.edit', compact('event'));
     }
 
-    /**
-     * Update event.
-     */
     public function update(Request $request, string $id)
     {
+        if (!Auth::check()) {
+            return redirect('/login');
+        }
+
         $event = Event::findOrFail($id);
 
         $request->validate([
@@ -127,11 +129,12 @@ class EventController extends Controller
             ->with('success', 'Event berhasil diupdate');
     }
 
-    /**
-     * Hapus event.
-     */
     public function destroy(string $id)
     {
+        if (!Auth::check()) {
+            return redirect('/login');
+        }
+
         $event = Event::findOrFail($id);
 
         $event->delete();
