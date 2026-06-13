@@ -11,7 +11,20 @@
 
     <h2>Edit Event</h2>
 
-    <form action="{{ route('events.update', $event->id) }}" method="POST">
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form action="{{ route('events.update', $event->id) }}"
+          method="POST"
+          enctype="multipart/form-data">
+
         @csrf
         @method('PUT')
 
@@ -68,11 +81,35 @@
                    required>
         </div>
 
+        <div class="mb-3">
+            <label>Proposal PDF</label>
+
+            <input type="file"
+                   name="proposal"
+                   class="form-control"
+                   accept=".pdf">
+
+            @if($event->proposal)
+                <div class="mt-2">
+                    <a href="{{ asset('storage/'.$event->proposal) }}"
+                       target="_blank"
+                       class="btn btn-info btn-sm">
+                        Lihat Proposal Saat Ini
+                    </a>
+                </div>
+            @endif
+
+            <small class="text-muted">
+                Kosongkan jika tidak ingin mengganti proposal.
+            </small>
+        </div>
+
         <button type="submit" class="btn btn-warning">
             Update Event
         </button>
 
-        <a href="{{ route('events.index') }}" class="btn btn-secondary">
+        <a href="{{ route('events.index') }}"
+           class="btn btn-secondary">
             Kembali
         </a>
 

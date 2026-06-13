@@ -21,7 +21,7 @@
         </div>
     @endif
 
-    <table class="table table-bordered">
+    <table class="table table-bordered table-striped">
 
         <thead>
             <tr>
@@ -31,6 +31,7 @@
                 <th>Tanggal</th>
                 <th>Lokasi</th>
                 <th>Status</th>
+                <th>Proposal</th>
                 <th>Aksi</th>
             </tr>
         </thead>
@@ -40,37 +41,75 @@
         @forelse($events as $event)
 
             <tr>
+
                 <td>{{ $loop->iteration }}</td>
+
                 <td>{{ $event->nama_event }}</td>
+
                 <td>{{ $event->kategori }}</td>
+
                 <td>{{ $event->tanggal_event }}</td>
+
                 <td>{{ $event->lokasi }}</td>
-                <td>{{ $event->status }}</td>
+
                 <td>
+                    @if($event->status == 'pending')
+                        <span class="badge bg-warning text-dark">
+                            Pending
+                        </span>
+                    @elseif($event->status == 'approved')
+                        <span class="badge bg-success">
+                            Approved
+                        </span>
+                    @else
+                        <span class="badge bg-danger">
+                            Rejected
+                        </span>
+                    @endif
+                </td>
+
+                <td>
+                    @if($event->proposal)
+                        <a href="{{ asset('storage/'.$event->proposal) }}"
+                           target="_blank"
+                           class="btn btn-info btn-sm">
+                            Lihat PDF
+                        </a>
+                    @else
+                        -
+                    @endif
+                </td>
+
+                <td>
+
                     <a href="{{ route('events.edit', $event->id) }}"
-                        class="btn btn-warning btn-sm">
+                       class="btn btn-warning btn-sm">
                         Edit
                     </a>
 
                     <form action="{{ route('events.destroy', $event->id) }}"
-                         method="POST"
-                        style="display:inline;">
+                          method="POST"
+                          style="display:inline;">
+
                         @csrf
                         @method('DELETE')
 
-                    <button type="submit"
-                     class="btn btn-danger btn-sm"
-                     onclick="return confirm('Yakin hapus event ini?')">
-                     Hapus
-                    </button>
+                        <button type="submit"
+                                class="btn btn-danger btn-sm"
+                                onclick="return confirm('Yakin hapus event ini?')">
+                            Hapus
+                        </button>
+
                     </form>
-            </td>
+
+                </td>
+
             </tr>
 
         @empty
 
             <tr>
-                <td colspan="6" class="text-center">
+                <td colspan="8" class="text-center">
                     Belum ada event
                 </td>
             </tr>

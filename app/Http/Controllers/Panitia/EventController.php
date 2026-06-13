@@ -35,23 +35,32 @@ class EventController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama_event' => 'required',
-            'kategori' => 'required',
-            'deskripsi' => 'required',
-            'target_dana' => 'required|numeric',
-            'tanggal_event' => 'required|date',
-            'lokasi' => 'required',
+            'nama_event'     => 'required',
+            'kategori'       => 'required',
+            'deskripsi'      => 'required',
+            'target_dana'    => 'required|numeric',
+            'tanggal_event'  => 'required|date',
+            'lokasi'         => 'required',
+            'proposal'       => 'nullable|mimes:pdf|max:5120',
         ]);
 
+        $proposalPath = null;
+
+        if ($request->hasFile('proposal')) {
+            $proposalPath = $request->file('proposal')
+                ->store('proposals', 'public');
+        }
+
         Event::create([
-            'user_id' => Auth::id(),
-            'nama_event' => $request->nama_event,
-            'kategori' => $request->kategori,
-            'deskripsi' => $request->deskripsi,
-            'target_dana' => $request->target_dana,
-            'tanggal_event' => $request->tanggal_event,
-            'lokasi' => $request->lokasi,
-            'status' => 'pending',
+            'user_id'        => Auth::id(),
+            'nama_event'     => $request->nama_event,
+            'kategori'       => $request->kategori,
+            'deskripsi'      => $request->deskripsi,
+            'proposal'       => $proposalPath,
+            'target_dana'    => $request->target_dana,
+            'tanggal_event'  => $request->tanggal_event,
+            'lokasi'         => $request->lokasi,
+            'status'         => 'pending',
         ]);
 
         return redirect()
@@ -59,54 +68,76 @@ class EventController extends Controller
             ->with('success', 'Event berhasil dibuat');
     }
 
+    /**
+     * Detail event.
+     */
     public function show(string $id)
     {
-        //
+        $event = Event::findOrFail($id);
+
+        return view('panitia.events.show', compact('event'));
     }
 
+    /**
+     * Form edit event.
+     */
     public function edit(string $id)
     {
-           $event = Event::findOrFail($id);
+        $event = Event::findOrFail($id);
 
-    return view('panitia.events.edit', compact('event'));
+        return view('panitia.events.edit', compact('event'));
     }
 
+    /**
+     * Update event.
+     */
     public function update(Request $request, string $id)
     {
-       $event = Event::findOrFail($id);
+        $event = Event::findOrFail($id);
 
-    $request->validate([
-        'nama_event' => 'required',
-        'kategori' => 'required',
-        'deskripsi' => 'required',
-        'target_dana' => 'required|numeric',
-        'tanggal_event' => 'required|date',
-        'lokasi' => 'required',
-    ]);
+        $request->validate([
+            'nama_event'     => 'required',
+            'kategori'       => 'required',
+            'deskripsi'      => 'required',
+            'target_dana'    => 'required|numeric',
+            'tanggal_event'  => 'required|date',
+            'lokasi'         => 'required',
+            'proposal'       => 'nullable|mimes:pdf|max:5120',
+        ]);
 
-    $event->update([
-        'nama_event' => $request->nama_event,
-        'kategori' => $request->kategori,
-        'deskripsi' => $request->deskripsi,
-        'target_dana' => $request->target_dana,
-        'tanggal_event' => $request->tanggal_event,
-        'lokasi' => $request->lokasi,
-    ]);
+        $proposalPath = $event->proposal;
 
-    return redirect()
-        ->route('events.index')
-        ->with('success', 'Event berhasil diupdate');
+        if ($request->hasFile('proposal')) {
+            $proposalPath = $request->file('proposal')
+                ->store('proposals', 'public');
+        }
+
+        $event->update([
+            'nama_event'     => $request->nama_event,
+            'kategori'       => $request->kategori,
+            'deskripsi'      => $request->deskripsi,
+            'proposal'       => $proposalPath,
+            'target_dana'    => $request->target_dana,
+            'tanggal_event'  => $request->tanggal_event,
+            'lokasi'         => $request->lokasi,
+        ]);
+
+        return redirect()
+            ->route('events.index')
+            ->with('success', 'Event berhasil diupdate');
     }
 
+    /**
+     * Hapus event.
+     */
     public function destroy(string $id)
     {
-         $event = Event::findOrFail($id);
+        $event = Event::findOrFail($id);
 
-    $event->delete();
+        $event->delete();
 
-    return redirect()
-        ->route('events.index')
-        ->with('success', 'Event berhasil dihapus');
+        return redirect()
+            ->route('events.index')
+            ->with('success', 'Event berhasil dihapus');
     }
-    
 }

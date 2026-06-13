@@ -12,9 +12,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+/*
+|--------------------------------------------------------------------------
+| Route Setelah Login
+|--------------------------------------------------------------------------
+*/
 
 Route::middleware('auth')->group(function () {
 
@@ -22,19 +24,28 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Dashboard Admin
+});
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
         ->name('admin.dashboard');
 
-    // Dashboard Panitia
+});
+
+Route::middleware(['auth', 'role:panitia'])->group(function () {
+
     Route::get('/panitia/dashboard', [PanitiaDashboardController::class, 'index'])
         ->name('panitia.dashboard');
 
-    // Dashboard Perusahaan
+    Route::resource('events', EventController::class);
+
+});
+
+Route::middleware(['auth', 'role:perusahaan'])->group(function () {
+
     Route::get('/perusahaan/dashboard', [PerusahaanDashboardController::class, 'index'])
         ->name('perusahaan.dashboard');
-
-    Route::resource('events', EventController::class);
 
 });
 

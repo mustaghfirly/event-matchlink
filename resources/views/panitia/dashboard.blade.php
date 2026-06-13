@@ -33,7 +33,7 @@
             <div class="card">
                 <div class="card-body text-center">
                     <h5>Total Event</h5>
-                    <h2>0</h2>
+                    <h2>{{ $totalEvent }}</h2>
                 </div>
             </div>
         </div>
@@ -42,7 +42,7 @@
             <div class="card">
                 <div class="card-body text-center">
                     <h5>Pending</h5>
-                    <h2>0</h2>
+                    <h2>{{ $pendingEvent }}</h2>
                 </div>
             </div>
         </div>
@@ -51,7 +51,7 @@
             <div class="card">
                 <div class="card-body text-center">
                     <h5>Disetujui</h5>
-                    <h2>0</h2>
+                    <h2>{{ $approvedEvent }}</h2>
                 </div>
             </div>
         </div>
@@ -59,6 +59,13 @@
     </div>
 
 </div>
+
+    <form method="POST" action="{{ route('logout') }}">
+    @csrf
+    <button type="submit" class="btn btn-danger">
+        Logout
+    </button>
+</form>
 
 </body>
 </html>
