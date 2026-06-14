@@ -16,6 +16,7 @@ use App\Http\Controllers\Panitia\CompanyController as PanitiaCompanyController;
 use App\Http\Controllers\Panitia\SponsorshipController as PanitiaSponsorshipController;
 use App\Http\Controllers\Panitia\MessageController as PanitiaMessageController;
 use App\Http\Controllers\Perusahaan\MessageController as PerusahaanMessageController;
+use App\Http\Controllers\NotificationController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -32,6 +33,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('/notifications', [NotificationController::class, 'unread'])->name('notifications.unread');
 
 });
 
@@ -115,6 +118,9 @@ Route::middleware(['role:panitia'])->group(function () {
         Route::get('/', [PanitiaMessageController::class, 'index'])
             ->name('index');
 
+        Route::get('/{sponsorship}/poll', [PanitiaMessageController::class, 'poll'])
+            ->name('poll');
+
         Route::get('/{sponsorship}', [PanitiaMessageController::class, 'show'])
             ->name('show');
 
@@ -169,6 +175,9 @@ Route::middleware(['role:perusahaan'])->group(function () {
 
         Route::get('/', [PerusahaanMessageController::class, 'index'])
             ->name('index');
+
+        Route::get('/{sponsorship}/poll', [PerusahaanMessageController::class, 'poll'])
+            ->name('poll');
 
         Route::get('/{sponsorship}', [PerusahaanMessageController::class, 'show'])
             ->name('show');

@@ -32,4 +32,9 @@
     </div>
     @endforelse
 </div>
+@if(method_exists($companies, 'links'))
+    <div class="mt-6">
+        {{ $companies->links() }}
+    </div>
+@endif
 @endsection

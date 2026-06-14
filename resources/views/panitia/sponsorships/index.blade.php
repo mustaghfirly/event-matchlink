@@ -54,4 +54,9 @@
     </div>
     @endforelse
 </div>
+@if(method_exists($sponsorships, 'links'))
+    <div class="mt-6">
+        {{ $sponsorships->links() }}
+    </div>
+@endif
 @endsection

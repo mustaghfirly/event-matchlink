@@ -27,14 +27,16 @@ class SponsorshipController extends Controller
                 ->with('success', 'Lengkapi profil perusahaan terlebih dahulu');
         }
 
-        $sponsorships = Sponsorship::where('company_id', $company->id)
+        $baseQuery = Sponsorship::where('company_id', $company->id);
+
+        $pendingCount  = (clone $baseQuery)->where('status', 'pending')->count();
+        $acceptedCount = (clone $baseQuery)->where('status', 'accepted')->count();
+        $rejectedCount = (clone $baseQuery)->where('status', 'rejected')->count();
+
+        $sponsorships = (clone $baseQuery)
             ->with(['event', 'event.user'])
             ->latest()
-            ->get();
-
-        $pendingCount  = $sponsorships->where('status', 'pending')->count();
-        $acceptedCount = $sponsorships->where('status', 'accepted')->count();
-        $rejectedCount = $sponsorships->where('status', 'rejected')->count();
+            ->paginate(10);
 
         return view('perusahaan.sponsorships.index', compact(
             'sponsorships',

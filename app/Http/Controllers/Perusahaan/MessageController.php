@@ -25,11 +25,19 @@ class MessageController extends Controller
             return redirect()->route('perusahaan.company.create');
         }
 
-        $sponsorships = Sponsorship::where('company_id', $company->id)
+        $sponsorshipIds = Sponsorship::where('company_id', $company->id)
             ->where('status', 'accepted')
+            ->pluck('id');
+
+        $unreadCount = Message::whereIn('sponsorship_id', $sponsorshipIds)
+            ->where('receiver_id', Auth::id())
+            ->where('is_read', false)
+            ->count();
+
+        $sponsorships = Sponsorship::whereIn('id', $sponsorshipIds)
             ->with(['event', 'company'])
             ->latest()
-            ->get();
+            ->paginate(10);
 
         $unreadCount = Message::whereIn('sponsorship_id', $sponsorships->pluck('id'))
             ->where('receiver_id', Auth::id())
@@ -67,6 +75,25 @@ class MessageController extends Controller
             ->get();
 
         return view('perusahaan.messages.show', compact('sponsorship', 'messages'));
+    }
+
+    public function poll(Sponsorship $sponsorship)
+    {
+        if (!Auth::check()) {
+            abort(403);
+        }
+
+        $company = Auth::user()->company;
+        if (!$company || $sponsorship->company_id !== $company->id) {
+            abort(403);
+        }
+
+        $messages = Message::where('sponsorship_id', $sponsorship->id)
+            ->with('sender:id,name')
+            ->oldest()
+            ->get();
+
+        return response()->json($messages);
     }
 
     public function store(Request $request, Sponsorship $sponsorship)

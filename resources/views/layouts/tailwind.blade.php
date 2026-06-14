@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', config('app.name'))</title>
+    <link rel="icon" href="{{ asset('images/logo_event_matchlink.png') }}">
     @vite('resources/css/app.css')
     <style>
         [x-cloak] { display: none !important; }
@@ -32,8 +33,8 @@
             @else
             <a href="/" class="flex items-center gap-2">
             @endauth
-                <span class="text-xl font-bold text-indigo-600">EventMatch</span>
-                <span class="text-xl font-light text-gray-400">Link</span>
+                <img src="{{ asset('images/logo_event_matchlink.png') }}" alt="EventMatchLink" class="h-7">
+                <span class="text-lg font-bold text-indigo-600">Event<span class="text-gray-400 font-light">Match</span>Link</span>
             </a>
             <button @click="sidebarOpen = false" class="lg:hidden text-gray-400 hover:text-gray-600">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,6 +126,83 @@
 
             <div class="flex items-center gap-3">
                 @auth
+                {{-- Notifikasi Bell --}}
+                <div x-data="{ notifOpen: false, count: 0, items: [], prevCount: null }"
+                     x-init="
+                         function playNotify() {
+                             try {
+                                 let ctx = new (window.AudioContext || window.webkitAudioContext)();
+                                 let osc = ctx.createOscillator();
+                                 let gain = ctx.createGain();
+                                 osc.connect(gain);
+                                 gain.connect(ctx.destination);
+                                 osc.type = 'sine';
+                                 osc.frequency.value = 800;
+                                 gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                                 gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+                                 osc.start(ctx.currentTime);
+                                 osc.stop(ctx.currentTime + 0.15);
+                                 setTimeout(() => {
+                                     let osc2 = ctx.createOscillator();
+                                     let gain2 = ctx.createGain();
+                                     osc2.connect(gain2);
+                                     gain2.connect(ctx.destination);
+                                     osc2.type = 'sine';
+                                     osc2.frequency.value = 1200;
+                                     gain2.gain.setValueAtTime(0.25, ctx.currentTime);
+                                     gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
+                                     osc2.start(ctx.currentTime);
+                                     osc2.stop(ctx.currentTime + 0.12);
+                                 }, 120);
+                             } catch(e) {}
+                         }
+                         let stored = sessionStorage.getItem('notifPrevCount');
+                         prevCount = stored !== null ? parseInt(stored, 10) : null;
+                         async function fetchNotif() {
+                             try {
+                                 let r = await (await fetch('{{ route('notifications.unread') }}')).json();
+                                 if (prevCount !== null && r.count > prevCount) { playNotify(); }
+                                 prevCount = r.count;
+                                 sessionStorage.setItem('notifPrevCount', r.count);
+                                 count = r.count;
+                                 items = r.items;
+                             } catch(e) {}
+                         }
+                         setInterval(fetchNotif, 5000);
+                         fetchNotif();
+                     "
+                     class="relative">
+                    <button @click="notifOpen = !notifOpen" class="relative p-2 text-gray-500 hover:text-indigo-600 transition rounded-lg hover:bg-gray-100">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+                        <span x-show="count > 0" x-cloak
+                              class="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full">
+                            <span x-text="count > 9 ? '9+' : count"></span>
+                        </span>
+                    </button>
+
+                    <div x-show="notifOpen" x-cloak @click.outside="notifOpen = false"
+                         class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                        <div class="px-4 py-2 border-b border-gray-100">
+                            <p class="text-sm font-semibold text-gray-800">Notifikasi</p>
+                        </div>
+                        <template x-if="items.length === 0">
+                            <div class="px-4 py-6 text-center text-sm text-gray-400">Tidak ada notifikasi</div>
+                        </template>
+                        <template x-for="item in items" :key="item.text">
+                            <a :href="item.url" @click="notifOpen = false"
+                               class="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 transition border-b border-gray-50 last:border-0">
+                                <span x-text="item.icon" class="text-base"></span>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm text-gray-700" x-text="item.text"></p>
+                                    <p class="text-xs text-gray-400 mt-0.5" x-text="item.time"></p>
+                                </div>
+                            </a>
+                        </template>
+                    </div>
+                </div>
+
                 <div x-data="{ open: false }" class="relative">
                     <button @click="open = !open" class="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition">
                         <span class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-semibold">

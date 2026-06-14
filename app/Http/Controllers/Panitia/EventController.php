@@ -17,7 +17,7 @@ class EventController extends Controller
 
         $events = Event::where('user_id', Auth::id())
             ->latest()
-            ->get();
+            ->paginate(10);
 
         return view('panitia.events.index', compact('events'));
     }

@@ -85,5 +85,10 @@
             </tbody>
         </table>
     </div>
+    @if(method_exists($events, 'links'))
+        <div class="px-6 py-4 border-t border-gray-100">
+            {{ $events->links() }}
+        </div>
+    @endif
 </div>
 @endsection

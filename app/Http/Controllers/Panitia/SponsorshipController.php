@@ -21,16 +21,18 @@ class SponsorshipController extends Controller
             ]);
         }
 
-        $sponsorships = Sponsorship::whereHas('event', function ($q) {
+        $baseQuery = Sponsorship::whereHas('event', function ($q) {
             $q->where('user_id', Auth::id());
-        })
-        ->with(['event', 'company'])
-        ->latest()
-        ->get();
+        });
 
-        $pendingCount  = $sponsorships->where('status', 'pending')->count();
-        $acceptedCount = $sponsorships->where('status', 'accepted')->count();
-        $rejectedCount = $sponsorships->where('status', 'rejected')->count();
+        $pendingCount  = (clone $baseQuery)->where('status', 'pending')->count();
+        $acceptedCount = (clone $baseQuery)->where('status', 'accepted')->count();
+        $rejectedCount = (clone $baseQuery)->where('status', 'rejected')->count();
+
+        $sponsorships = (clone $baseQuery)
+            ->with(['event', 'company'])
+            ->latest()
+            ->paginate(10);
 
         return view('panitia.sponsorships.index', compact(
             'sponsorships',

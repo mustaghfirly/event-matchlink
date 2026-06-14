@@ -19,18 +19,21 @@ class MessageController extends Controller
             ]);
         }
 
-        $sponsorships = Sponsorship::whereHas('event', function ($q) {
+        $sponsorshipIds = Sponsorship::whereHas('event', function ($q) {
             $q->where('user_id', Auth::id());
         })
         ->where('status', 'accepted')
-        ->with(['event', 'company'])
-        ->latest()
-        ->get();
+        ->pluck('id');
 
-        $unreadCount = Message::whereIn('sponsorship_id', $sponsorships->pluck('id'))
+        $unreadCount = Message::whereIn('sponsorship_id', $sponsorshipIds)
             ->where('receiver_id', Auth::id())
             ->where('is_read', false)
             ->count();
+
+        $sponsorships = Sponsorship::whereIn('id', $sponsorshipIds)
+            ->with(['event', 'company'])
+            ->latest()
+            ->paginate(10);
 
         return view('panitia.messages.index', compact('sponsorships', 'unreadCount'));
     }
@@ -61,6 +64,20 @@ class MessageController extends Controller
             ->get();
 
         return view('panitia.messages.show', compact('sponsorship', 'messages'));
+    }
+
+    public function poll(Sponsorship $sponsorship)
+    {
+        if (!Auth::check() || $sponsorship->event->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $messages = Message::where('sponsorship_id', $sponsorship->id)
+            ->with('sender:id,name')
+            ->oldest()
+            ->get();
+
+        return response()->json($messages);
     }
 
     public function store(Request $request, Sponsorship $sponsorship)

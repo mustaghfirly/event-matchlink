@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EventMatchLink</title>
+    <link rel="icon" href="{{ asset('images/logo_event_matchlink.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans text-gray-900 antialiased bg-gray-50" x-data="{ showModal: false }">
@@ -12,8 +13,9 @@
     <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="h-16 flex items-center justify-between">
-                <a href="/" class="text-2xl font-bold text-indigo-600">
-                    Event<span class="text-gray-400 font-light">Match</span><span class="text-indigo-600">Link</span>
+                <a href="/" class="flex items-center gap-2">
+                    <img src="{{ asset('images/logo_event_matchlink.png') }}" alt="EventMatchLink" class="h-8">
+                    <span class="text-xl font-bold text-indigo-600">Event<span class="text-gray-400 font-light">Match</span>Link</span>
                 </a>
                 <div class="flex items-center gap-3">
                     <a href="{{ route('login') }}" class="px-5 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 transition">Masuk</a>

@@ -11,7 +11,7 @@ class CompanyController extends Controller
 {
     public function index()
     {
-        $companies = Company::with('user')->latest()->get();
+        $companies = Company::with('user')->latest()->paginate(10);
 
         return view('panitia.companies.index', compact('companies'));
     }
